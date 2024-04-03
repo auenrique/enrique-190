@@ -50,6 +50,12 @@ def preprocess_stream(tokenized_text):
     text = ' '.join(tokenized_text)
     return text
 
+def tokenize_nostem(text):
+    text = text.lower()
+    text = remove_punctuation(text)
+    text_arr = tokenize(text)
+    return text_arr
+
 
 #returns data for all steps of tokenization
 def tokenize_data(data,fast):
@@ -60,6 +66,7 @@ def tokenize_data(data,fast):
         stopword = nltk.corpus.stopwords.words('english')
         lemmatizer = nltk.WordNetLemmatizer()
         tokenized["tokenized"] = tokenized["text"].apply(lambda x: tokenize_stream(x, stopword, lemmatizer))
+        tokenized["tok_nostem"] = tokenized["text"].apply(lambda x: tokenize_nostem(x))
         tokenized["preprocessed"] = tokenized["tokenized"].apply(lambda x: preprocess_stream(x))
         tokenized["label"] = data["label"]
     else:

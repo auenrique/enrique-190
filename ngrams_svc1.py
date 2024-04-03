@@ -38,6 +38,7 @@ def main():
     after_tokenize = tokenizer.tokenize_data(data, True)
 
     dd = pd.DataFrame.from_dict(after_tokenize)
+    dd.to_csv ('help.tsv', sep='\t', index=False)
     #print(dd.shape)
     #drop columns where preprocessed is empty
     #dd = dd[dd['preprocessed'].map(lambda d: len(d)) > 0]
@@ -58,6 +59,7 @@ def main():
     
     #merge emo_features and n-gram features
     # xd = pd.concat([ef, xd], axis=1)
+    xd = np.concatenate((ef, xd.toarray()), axis=1)
     #xd = np.array(dataframes['unigram_bigram_trigram'].toarray())
 
     train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, stratify=df[0].str.split(',').apply(lambda x: x[0]), random_state=42)
@@ -86,6 +88,10 @@ def main():
     target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
     #print(multilabel_confusion_matrix(yy, test),target_names)
     print(classification_report(yy, test, target_names=target_names))
+
+    #todo
+    #try other countvectorizers
+    #look at other papers that use xed
    
 
 if __name__ == "__main__":
