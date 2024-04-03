@@ -61,7 +61,7 @@ def main():
     #xd = np.array(dataframes['unigram_bigram_trigram'].toarray())
 
     train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, stratify=df[0].str.split(',').apply(lambda x: x[0]), random_state=42)
-    train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.16666, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
+    train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
 
     # ddf = pd.DataFrame(df[0].str.split(',').apply(lambda x: x[0]))
     
