@@ -17,7 +17,9 @@ def generate_n_gram_features(flat_list_transcription):
     n_gram_features ={'unigram':(1,1),'unigram_bigram':(1,2),'bigram':(2,2),'bigram_trigram':(2,3),'trigram':(3,3), 'unigram_bigram_trigram':(1,3)}
     temp=[]
     for key, values in n_gram_features.items(): 
-        vectorizer = CountVectorizer(ngram_range=values)
+        #vectorizer = CountVectorizer(ngram_range=values)
+        vectorizer = CountVectorizer(ngram_range=values, strip_accents='unicode')
+
         vectorizer.fit(flat_list_transcription)
         # print(vectorizer.get_feature_names_out())
         temp.append(vectorizer.transform(flat_list_transcription))
@@ -160,16 +162,22 @@ def main():
     emo_features = emotions.get_emotion_features(after_tokenize, lex)
 
     ef = pd.DataFrame.from_dict(emo_features)
-    xd = pd.DataFrame(dataframes['unigram_bigram_trigram'].toarray())
+    #xd = pd.DataFrame(dataframes['unigram_bigram_trigram'].toarray())
+
+    # ad = pd.DataFrame(dataframes['unigram'].toarray())
+    # bd = pd.DataFrame(dataframes['bigram'].toarray())
+    # cd = pd.DataFrame(dataframes['trigram'].toarray())
+    # dd = pd.concat([ad, bd, cd], axis=1)
+    #dd = np.concatenate((dataframes['unigram'].toarray(), dataframes['bigram'].toarray(), dataframes['trigram'].toarray()), axis=1)
     #merge emo_features and n-gram features
-    xd = pd.concat([ef, xd], axis=1)
-    xd = np.array(xd)
+    # xd = pd.concat([ef, xd], axis=1)
+    #xd = np.array(dataframes['unigram_bigram_trigram'].toarray())
 
     #tf = TfidfTransformer()
     #dataframes['unigram_bigram_trigram'] = tf.fit_transform(dataframes['unigram_bigram_trigram'])
 
-    train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, stratify=df[0].str.split(',').apply(lambda x: x[0]), random_state=42)
-    train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
+    train_dev_X, test_X, train_dev_y, test_y = train_test_split(dataframes['unigram_bigram_trigram'], df[0], test_size=0.1, stratify=df[0].str.split(',').apply(lambda x: x[0]), random_state=42)
+    train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.16666, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
 
     # df = pd.DataFrame.from_dict(after_tokenize['first_label'].values.ravel())
     
