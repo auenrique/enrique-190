@@ -7,8 +7,11 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from sklearn.metrics import f1_score
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics import classification_report
 from sklearn.metrics import multilabel_confusion_matrix
+from sklearn.model_selection import StratifiedKFold
 
 import tokenizer
 import emotions
@@ -28,6 +31,19 @@ def to_array(data):
 
     return np.array(arr)
 
+def count_labels(data):
+    #print(data)
+    labels = {}
+    for i in range(1,9):
+        labels[i] = 0
+    for i in data:
+        for j in range(1,9):
+            if str(j) in i:
+                labels[j] += 1
+    return labels
+
+
+
 def main():
     data = pd.read_csv('en-annotated.tsv', sep='\t', names=['text', 'label'])
     data.head()
@@ -45,9 +61,12 @@ def main():
     #print(dd.shape)
 
     vec = CountVectorizer(ngram_range=(1,3))
-    xd = vec.fit_transform(dd['preprocessed'])
+    tf = HashingVectorizer(ngram_range=(1,3))
+    xd = vec.fit_transform(dd['text'])
     #print datatype of xd
-    print(type(xd))
+    #print(type(xd))
+
+    #print(count_labels(after_tokenize['label']))
     
     df = pd.DataFrame.from_dict(dd['label'].values.ravel())
 
@@ -59,12 +78,20 @@ def main():
     
     #merge emo_features and n-gram features
     # xd = pd.concat([ef, xd], axis=1)
-    xd = np.concatenate((ef, xd.toarray()), axis=1)
+    #xd = np.concatenate((ef, xd.toarray()), axis=1)
     #xd = np.array(dataframes['unigram_bigram_trigram'].toarray())
+    xd = dd['text']
 
     train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, stratify=df[0].str.split(',').apply(lambda x: x[0]), random_state=42)
     train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
 
+    # skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    # for train_index, test_index in skf.split(X, y):
+    #     X_train, X_test = X[train_index], X[test_index]
+    #     y_train, y_test = y[train_index], y[test_index]
+
+    # train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, random_state=42)
+    # train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, random_state=42)
     # ddf = pd.DataFrame(df[0].str.split(',').apply(lambda x: x[0]))
     
     # train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, ddf[0], test_size=0.1, stratify=ddf[0], random_state=42)
@@ -73,17 +100,21 @@ def main():
     #clf = LinearSVC(class_weight='balanced', C=0.05, random_state=42)
     clf = OneVsRestClassifier(LinearSVC(class_weight='balanced', C=0.05, random_state=42))
 
-    X = train_X
+    vec = CountVectorizer(analyzer='word')
+
+    X = vec.fit_transform(train_X)
     y = to_array(train_y)
+
+    #print(X.shape, y.shape)
 
     clf.fit(X, y)
 
-    XX = test_X
+    XX = vec.transform(test_X)
     yy = to_array(test_y)
 
     test = clf.predict(XX)
 
-    print(set(yy.ravel()) - set(test.ravel()))
+    #print(set(yy.ravel()) - set(test.ravel()))
 
     target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
     #print(multilabel_confusion_matrix(yy, test),target_names)
