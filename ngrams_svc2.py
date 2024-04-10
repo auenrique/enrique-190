@@ -9,7 +9,7 @@ from sklearn.metrics import f1_score
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 import tokenizer
 import emotions
@@ -63,6 +63,7 @@ def main():
     target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
 
     print(classification_report(yy, y_pred, target_names=target_names))
+    print(confusion_matrix(yy, y_pred))
 
 if __name__ == "__main__":
     main()

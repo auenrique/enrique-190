@@ -121,7 +121,7 @@ def get_emotion_features (data, lex):
 
     #add emotion features to emotion_features
     #print('getting raw scores...')
-    raw_scores = data['tok_nostem'].apply(lambda x: build_raw_score(x, lex))
+    raw_scores = data.apply(lambda x: build_raw_score(x, lex))
     for emotion in raw_scores[0]:
         emotion_features[emotion] = raw_scores.apply(lambda x: x[emotion])
     #emotion_features = pd.concat([emotion_features, raw_scores.apply(pd.Series)], axis=1)
@@ -136,14 +136,14 @@ def get_emotion_features (data, lex):
     # emotion_features['emotionality'] = emotionality
 
     # print('getting avg emotion scores...')
-    avg_emotion_scores = data['tok_nostem'].apply(lambda x: get_avg_emotion(x, lex))
-    for emotion in avg_emotion_scores[0]:
-        emotion_features[emotion] = avg_emotion_scores.apply(lambda x: x[emotion])
+    avg_emotion_scores = data.apply(lambda x: get_avg_emotion(x, lex))
+    # for emotion in avg_emotion_scores[0]:
+    #     emotion_features[emotion] = avg_emotion_scores.apply(lambda x: x[emotion])
 
     # print('getting emotion percentages...')
-    pct_emotion_scores = data['tok_nostem'].apply(lambda x: get_pct_emotion(x, lex))
-    for emotion in pct_emotion_scores[0]:
-        emotion_features[emotion] = pct_emotion_scores.apply(lambda x: x[emotion])
+    pct_emotion_scores = data.apply(lambda x: get_pct_emotion(x, lex))
+    # for emotion in pct_emotion_scores[0]:
+    #     emotion_features[emotion] = pct_emotion_scores.apply(lambda x: x[emotion])
 
     # print('getting sentiment percentages...')
     # pct_sentiment_scores = emotion_features['preprocessed'].apply(lambda x: get_pct_sentiment(x, lex))
