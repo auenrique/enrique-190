@@ -15,7 +15,7 @@ anticipation       0.39      0.48      0.43       334
 weighted avg       0.38      0.44      0.41      2244
  samples avg       0.36      0.47      0.39      2244
 
-## lowercase, remove punctuation, stemmed
+### lowercase, remove punctuation, stemmed
 
               precision    recall  f1-score   support
 
