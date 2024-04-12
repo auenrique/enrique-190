@@ -63,10 +63,11 @@ def get_emotion_words (text, lex):
 
 def get_emotionality (text, lex):
     emotion_words = get_emotion_words(text, lex)
+    emotion_word_cnt = len(emotion_words)
     total_words = len(text)
     if(total_words == 0):
         total_words = 1
-    emotionality = emotion_words/total_words
+    emotionality = emotion_word_cnt/total_words
     return emotionality
 
 def get_avg_emotion (text, lex):
@@ -132,16 +133,16 @@ def get_emotion_features (data, lex):
     # emotion_features['emotion_words'] = emotion_words
 
     # print('getting emotionality...')
-    # emotionality = emotion_features['preprocessed'].apply(lambda x: get_emotionality(x, lex))
+    # emotionality = data.apply(lambda x: get_emotionality(x, lex))
     # emotion_features['emotionality'] = emotionality
 
     # print('getting avg emotion scores...')
-    avg_emotion_scores = data.apply(lambda x: get_avg_emotion(x, lex))
+    # avg_emotion_scores = data.apply(lambda x: get_avg_emotion(x, lex))
     # for emotion in avg_emotion_scores[0]:
     #     emotion_features[emotion] = avg_emotion_scores.apply(lambda x: x[emotion])
 
     # print('getting emotion percentages...')
-    pct_emotion_scores = data.apply(lambda x: get_pct_emotion(x, lex))
+    # pct_emotion_scores = data.apply(lambda x: get_pct_emotion(x, lex))
     # for emotion in pct_emotion_scores[0]:
     #     emotion_features[emotion] = pct_emotion_scores.apply(lambda x: x[emotion])
 

@@ -36,37 +36,17 @@ def main():
     # Check if there are any missing values.
     print(data.isnull().sum())
     
-    after_tokenize = tokenizer.tokenize_data(data, True)
+    after_tokenize = tokenizer.tokenize_fromdf(data, True)
 
     dd = pd.DataFrame.from_dict(after_tokenize)
     dd.to_csv ('help.tsv', sep='\t', index=False)
-    #print(dd.shape)
-    #drop columns where preprocessed is empty
-    #dd = dd[dd['preprocessed'].map(lambda d: len(d)) > 0]
-    #print(dd.shape)
 
-    vec = CountVectorizer(ngram_range=(1,3))
-    tf = HashingVectorizer(ngram_range=(1,3))
-    xd = vec.fit_transform(dd['text'])
-    #print datatype of xd
-    #print(type(xd))
-
-    #print(count_labels(after_tokenize['label']))
-    df = pd.DataFrame.from_dict(dd['label'].values.ravel())
+    df = pd.DataFrame.from_dict(data['label'].values.ravel())[0]
 
     lex = emotions.build_lexicon()
-    #emo_features = emotions.get_emotion_features(after_tokenize, lex)
+    xd = data['text']
 
-    #ef = pd.DataFrame.from_dict(emo_features)
-    #xd = pd.DataFrame(dataframes['unigram_bigram_trigram'].toarray())
-    
-    #merge emo_features and n-gram features
-    # xd = pd.concat([ef, xd], axis=1)
-    #xd = np.concatenate((ef, xd.toarray()), axis=1)
-    #xd = np.array(dataframes['unigram_bigram_trigram'].toarray())
-    xd = dd['text']
-
-    train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, stratify=df[0].str.split(',').apply(lambda x: x[0]), random_state=42)
+    train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df, test_size=0.1, stratify=df.str.split(',').apply(lambda x: x[0]), random_state=42)
     train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
 
     # train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, random_state=42)
@@ -86,14 +66,17 @@ def main():
     emo_Xtrain = emotions.get_emotion_features(tok_Xtrain, lex)
     emo_Xtest = emotions.get_emotion_features(tok_Xtest, lex)
 
+    preprocess_Xtrain = tokenizer.tokenize_data(train_X, True)["preprocessed"]
+    preprocess_Xtest = tokenizer.tokenize_data(test_X, True)["preprocessed"]
+
     clf = OneVsRestClassifier(LinearSVC(class_weight='balanced', C=0.05, random_state=42))
 
     vec = CountVectorizer(analyzer='word',ngram_range=(1,3))
     mlb = MultiLabelBinarizer()
 
-    X = vec.fit_transform(train_X)
+    #X = vec.fit_transform(train_X)
+    X = vec.fit_transform(preprocess_Xtrain)
     y = mlb.fit_transform(train_y.str.replace(' ', '').str.split(','))
-    
 
     #append emotion features to n-gram features
     X = hstack([X, pd.DataFrame(emo_Xtrain)])
@@ -102,7 +85,8 @@ def main():
 
     clf.fit(X, y)
 
-    XX = vec.transform(test_X)
+    #XX = vec.transform(test_X)
+    XX = vec.transform(preprocess_Xtest)
     yy = mlb.transform(test_y.str.replace(' ', '').str.split(','))
 
     XX = hstack([XX, pd.DataFrame(emo_Xtest)])
@@ -112,13 +96,8 @@ def main():
 
     target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
     #print(multilabel_confusion_matrix(yy, test),target_names)
-    print(classification_report(yy, test, target_names=target_names))
-    #print(confusion_matrix(yy, test))
-
-    #todo
-    #try other countvectorizers
-    #look at other papers that use xed
-   
+    print(classification_report(yy, test, target_names=target_names, zero_division=0.0))
+    #print(confusion_matrix(yy, test))   
 
 if __name__ == "__main__":
     main()

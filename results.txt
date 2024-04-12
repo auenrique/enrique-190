@@ -1,0 +1,111 @@
+## lowercase remove punctuation, stop words, stemmed
+	      precision    recall  f1-score   support
+
+       anger       0.42      0.47      0.44       379
+anticipation       0.39      0.48      0.43       334
+     disgust       0.31      0.25      0.28       230
+        fear       0.37      0.39      0.38       244
+         joy       0.52      0.60      0.56       286
+     sadness       0.39      0.42      0.40       249
+    surprise       0.29      0.45      0.35       252
+       trust       0.34      0.41      0.37       270
+
+   micro avg       0.38      0.44      0.41      2244
+   macro avg       0.38      0.43      0.40      2244
+weighted avg       0.38      0.44      0.41      2244
+ samples avg       0.36      0.47      0.39      2244
+
+## lowercase, remove punctuation, stemmed
+
+              precision    recall  f1-score   support
+
+       anger       0.50      0.46      0.48       379
+anticipation       0.46      0.48      0.47       334
+     disgust       0.37      0.25      0.30       230
+        fear       0.41      0.36      0.38       244
+         joy       0.56      0.57      0.56       286
+     sadness       0.44      0.35      0.39       249
+    surprise       0.40      0.36      0.38       252
+       trust       0.43      0.38      0.40       270
+
+   micro avg       0.46      0.41      0.43      2244
+   macro avg       0.45      0.40      0.42      2244
+weighted avg       0.45      0.41      0.43      2244
+ samples avg       0.39      0.44      0.39      2244
+
+## lowercase, remove punctuation
+
+              precision    recall  f1-score   support
+
+       anger       0.47      0.44      0.45       379
+anticipation       0.46      0.49      0.47       334
+     disgust       0.39      0.25      0.31       230
+        fear       0.42      0.34      0.38       244
+         joy       0.55      0.56      0.56       286
+     sadness       0.47      0.34      0.39       249
+    surprise       0.40      0.34      0.36       252
+       trust       0.44      0.36      0.40       270
+
+   micro avg       0.46      0.40      0.43      2244
+   macro avg       0.45      0.39      0.41      2244
+weighted avg       0.45      0.40      0.42      2244
+ samples avg       0.38      0.43      0.38      2244
+
+## lowercase, remove punctuation, test+dev as training data
+
+              precision    recall  f1-score   support
+
+       anger       0.49      0.45      0.47       379
+anticipation       0.48      0.51      0.50       334
+     disgust       0.37      0.25      0.30       230
+        fear       0.40      0.34      0.37       244
+         joy       0.54      0.56      0.55       286
+     sadness       0.44      0.37      0.41       249
+    surprise       0.39      0.35      0.37       252
+       trust       0.46      0.41      0.43       270
+
+   micro avg       0.46      0.42      0.44      2244
+   macro avg       0.45      0.41      0.42      2244
+weighted avg       0.45      0.42      0.43      2244
+ samples avg       0.39      0.44      0.39      2244
+
+## lowercase, remove punctuation, stemmed, test+dev as training data
+
+              precision    recall  f1-score   support
+
+       anger       0.52      0.47      0.49       379
+anticipation       0.48      0.50      0.49       334
+     disgust       0.37      0.25      0.30       230
+        fear       0.43      0.38      0.40       244
+         joy       0.55      0.59      0.57       286
+     sadness       0.46      0.39      0.42       249
+    surprise       0.42      0.37      0.39       252
+       trust       0.46      0.42      0.44       270
+
+   micro avg       0.47      0.43      0.45      2244
+   macro avg       0.46      0.42      0.44      2244
+weighted avg       0.47      0.43      0.45      2244
+ samples avg       0.41      0.46      0.41      2244
+
+## lowercase, remove punctuation, stemmed, no emotion data
+
+              precision    recall  f1-score   support
+
+       anger       0.49      0.44      0.46       379
+anticipation       0.47      0.46      0.47       334
+     disgust       0.32      0.19      0.24       230
+        fear       0.41      0.30      0.35       244
+         joy       0.58      0.55      0.56       286
+     sadness       0.44      0.33      0.38       249
+    surprise       0.41      0.36      0.38       252
+       trust       0.43      0.35      0.39       270
+
+   micro avg       0.46      0.38      0.42      2244
+   macro avg       0.44      0.37      0.40      2244
+weighted avg       0.45      0.38      0.41      2244
+ samples avg       0.37      0.41      0.37      2244
+
+# adding emotion intensities slightly improves f1 score
+# removing stop words slightly worsens f1 score
+# increasing test size slightly improves f1 score
+# stemming slighly improves f1 score

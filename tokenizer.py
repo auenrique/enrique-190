@@ -40,7 +40,7 @@ def tokenize_stream(text, stopword, lemmatizer):
     text = remove_punctuation(text)    
     text_arr = tokenize(text)
     text_arr = stemmer_func(text_arr)
-    text_arr = remove_stopwords(stopword, text_arr)
+    #text_arr = remove_stopwords(stopword, text_arr)
     #text_arr = lemmatizer_func(lemmatizer, text_arr)
     
     return text_arr
@@ -56,9 +56,7 @@ def tokenize_nostem(text):
     text_arr = tokenize(text)
     return text_arr
 
-
-#returns data for all steps of tokenization
-def tokenize_data(data,fast):
+def tokenize_fromdf(data,fast):
     tokenized = dict()
     if(fast):
         tokenized = dict()
@@ -89,6 +87,37 @@ def tokenize_data(data,fast):
 
         tokenized["label"] = data["label"]
 
+
+    return tokenized
+
+#returns data for all steps of tokenization
+def tokenize_data(data,fast):
+    tokenized = dict()
+    if(fast):
+        tokenized = dict()
+        tokenized["text"] = data
+        stopword = nltk.corpus.stopwords.words('english')
+        lemmatizer = nltk.WordNetLemmatizer()
+        tokenized["tokenized"] = tokenized["text"].apply(lambda x: tokenize_stream(x, stopword, lemmatizer))
+        tokenized["tok_nostem"] = tokenized["text"].apply(lambda x: tokenize_nostem(x))
+        tokenized["preprocessed"] = tokenized["tokenized"].apply(lambda x: preprocess_stream(x))
+    else:
+        tokenized["text"] = data["text"]
+        print('removing special characters...')
+        tokenized["text_nopunct"] = tokenized["text"].apply(lambda x: remove_punctuation(x))
+        print('downcasing...')
+        tokenized["text_downcase"] = tokenized["text_nopunct"].apply(lambda x: x.lower())
+        print('tokenizing...')
+        tokenized["tokenized"] = tokenized["text_downcase"].apply(lambda x: tokenize(x))
+
+        print('removing stopwords...')
+        stopword = nltk.corpus.stopwords.words('english')
+        tokenized["nostop"] = tokenized["tokenized"].apply(lambda x: remove_stopwords(stopword, x))
+
+        print('lemmatizing...')
+        lemmatizer = nltk.WordNetLemmatizer()
+        #tokenize_alldata["stemmed"] = tokenize_alldata["nostop"].apply(lambda x: stemmer(porter, x))
+        tokenized["lemmatized"] = tokenized["nostop"].apply(lambda x: lemmatizer_func(lemmatizer, x))
 
     return tokenized
 
