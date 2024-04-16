@@ -283,6 +283,7 @@ weighted avg       0.45      0.38      0.41      2244
 
 
 # lower regularization parameter improves f1 score, until C=0.01
+# adding n-grams past 4-grams worsens f1 score
 # adding emotion intensities slightly improves f1 score
 # removing stop words slightly worsens f1 score
 # increasing test size slightly improves f1 score
