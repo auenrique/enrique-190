@@ -191,6 +191,24 @@ Emotion: trust
         Feature: raw_anticipation, Importance: -0.24761572340409804
         Feature: raw_disgust, Importance: -0.4040619728739608
 
+### same as above, unigrams ONLY
+
+              precision    recall  f1-score   support
+
+       anger       0.38      0.59      0.46       379
+anticipation       0.36      0.63      0.46       334
+     disgust       0.27      0.46      0.34       230
+        fear       0.33      0.61      0.43       244
+         joy       0.44      0.70      0.54       286
+     sadness       0.31      0.55      0.39       249
+    surprise       0.28      0.56      0.37       252
+       trust       0.30      0.61      0.41       270
+
+   micro avg       0.33      0.59      0.43      2244
+   macro avg       0.33      0.59      0.42      2244
+weighted avg       0.34      0.59      0.43      2244
+ samples avg       0.36      0.62      0.43      2244
+
 ## lowercase, remove punctuation, with emotions
 
               precision    recall  f1-score   support
@@ -264,7 +282,7 @@ weighted avg       0.45      0.38      0.41      2244
  samples avg       0.37      0.41      0.37      2244
 
 
-
+# lower regularization parameter improves f1 score, until C=0.01
 # adding emotion intensities slightly improves f1 score
 # removing stop words slightly worsens f1 score
 # increasing test size slightly improves f1 score

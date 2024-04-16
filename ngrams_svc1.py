@@ -72,7 +72,7 @@ def main():
     preprocess_Xtrain = tokenizer.tokenize_data(train_X, True)["preprocessed"]
     preprocess_Xtest = tokenizer.tokenize_data(test_X, True)["preprocessed"]
 
-    clf = OneVsRestClassifier(LinearSVC(dual='auto', class_weight='balanced', C=0.05, random_state=42))
+    clf = OneVsRestClassifier(LinearSVC(dual='auto', class_weight='balanced', C=0.01, random_state=42))
 
     vec = CountVectorizer(analyzer='word',ngram_range=(1,3))
     mlb = MultiLabelBinarizer()
