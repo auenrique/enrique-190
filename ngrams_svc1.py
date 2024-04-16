@@ -57,6 +57,9 @@ def main():
     # train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y, random_state=42)
 
     #clf = LinearSVC(class_weight='balanced', C=0.05, random_state=42)
+    # test_X = xd
+    # test_y = df
+
     train_X = train_X.reset_index(drop=True)
     test_X = test_X.reset_index(drop=True)
 
@@ -92,9 +95,33 @@ def main():
     XX = hstack([XX, pd.DataFrame(emo_Xtest)])
     test = clf.predict(XX)
 
+    emo = ['raw_anger', 'raw_anticipation', 'raw_disgust', 'raw_fear', 'raw_joy', 'raw_sadness', 'raw_surprise', 'raw_trust']
+    target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
+    features = vec.get_feature_names_out()
+    features = np.append(features, emo)
+
+    sorted_feature_importance = [None] * len(clf.estimators_)
+    for i in range(0, len(clf.estimators_)):
+        imp = clf.estimators_[i].coef_[0]
+        feature_importance = dict(zip(features, imp))
+        sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
+
+    for i in range(0, len(clf.estimators_)):
+        print(f'\nEmotion: {target_names[i]}')
+        j=0
+        for feature, importance in sorted_feature_importance[i]:
+            if(j<10 or feature in emo):
+                print(f'\tFeature: {feature}, Importance: {importance}')
+            j += 1
+
+
+    
+
+    #print(imp)
+
     #print(set(yy.ravel()) - set(test.ravel()))
 
-    target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
+    
     #print(multilabel_confusion_matrix(yy, test),target_names)
     print(classification_report(yy, test, target_names=target_names, zero_division=0.0))
     #print(confusion_matrix(yy, test))   
