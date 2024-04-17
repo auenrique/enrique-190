@@ -113,14 +113,6 @@ def main():
             if(j<10 or feature in emo):
                 print(f'\tFeature: {feature}, Importance: {importance}')
             j += 1
-
-
-    
-
-    #print(imp)
-
-    #print(set(yy.ravel()) - set(test.ravel()))
-
     
     #print(multilabel_confusion_matrix(yy, test),target_names)
     print(classification_report(yy, test, target_names=target_names, zero_division=0.0))
