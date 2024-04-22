@@ -46,6 +46,15 @@ def main():
     lex = emotions.build_lexicon()
     xd = data['text']
 
+    emowdcnt = emotions.get_emoword_cnt(xd.apply(lambda x: tokenizer.tokenize_nostem(x)), lex)
+    total = 0
+    cnt = 0
+    for i in range(0, len(emowdcnt)):
+        total += 1
+        if emowdcnt[i] > 0:
+            cnt += 1
+    print(cnt/total)
+
     train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df, test_size=0.1, stratify=df.str.split(',').apply(lambda x: x[0]), random_state=42)
     train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
 

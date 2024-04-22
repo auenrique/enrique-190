@@ -116,6 +116,17 @@ def get_pct_sentiment(text,lex):
 
     return pct
 
+def get_emotion_pct(data):
+    print(data)
+    # for thing in data:
+    #     print(data[thing])
+
+def get_emoword_cnt(data,lex):
+    emotion_words = data.apply(lambda x: get_emotion_words(x, lex))
+    for i in range(len(emotion_words)):
+        emotion_words[i] = len(emotion_words[i])
+    return emotion_words
+
 def get_emotion_features (data, lex):
     emotion_features = dict()
     #copy data to emotion_features
