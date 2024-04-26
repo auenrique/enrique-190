@@ -146,33 +146,44 @@ def train_model(train_X, train_y, test_X, test_y, use_intensity):
         emo = ['raw_anger', 'raw_anticipation', 'raw_disgust', 'raw_fear', 'raw_joy', 'raw_sadness', 'raw_surprise', 'raw_trust']
         features = np.append(features, emo)
 
-    clf = OneVsRestClassifier(LinearSVC(class_weight='balanced', C=0.01, random_state=42))
+    clf = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.01, random_state=42))
     clf.fit(X, y)    
 
     test = clf.predict(XX)
 
-    get_clf_metrics(clf, yy, test, vec.get_feature_names_out())
+    get_clf_metrics(clf, yy, test, features)
 
 def get_clf_metrics(clf, y_true, y_pred, features):
     target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
     emo = ['raw_anger', 'raw_anticipation', 'raw_disgust', 'raw_fear', 'raw_joy', 'raw_sadness', 'raw_surprise', 'raw_trust']
 
-    # sorted_feature_importance = [None] * len(clf.estimators_)
-    # for i in range(0, len(clf.estimators_)):
-    #     imp = clf.estimators_[i].coef_[0]
-    #     feature_importance = dict(zip(features, imp))
-    #     sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
+    sorted_feature_importance = [None] * len(clf.estimators_)
+    for i in range(0, len(clf.estimators_)):
+        imp = clf.estimators_[i].coef_[0]
+        feature_importance = dict(zip(features, imp))
+        sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
 
-    # for i in range(0, len(clf.estimators_)):
-    #     print(f'\nEmotion: {target_names[i]}')
-    #     j=0
-    #     for feature, importance in sorted_feature_importance[i]:
-    #         if(j<10 or feature in emo):
-    #             print(f'\tFeature: {feature}, Importance: {importance}')
-    #         j += 1
+    print(features)
+    for i in range(0, len(clf.estimators_)):
+        print(f'\nEmotion: {target_names[i]}')
+        ngram = []
+        emo_int = []
+        j=0
+        for feature, importance in sorted_feature_importance[i]:
+            if(feature in emo):
+                emo_int.append(f'\tFeature: {feature}, Importance: {importance}')
+            if(len(ngram)<10 and feature not in emo):
+                ngram.append(f'\tFeature: {feature}, Importance: {importance}')
+            
+        for n in ngram:
+            print(n)
+        for e in emo_int:
+            print(e)
 
     print(classification_report(y_true, y_pred, target_names=target_names, zero_division=0.0))
-    print(roc_auc_score(y_true, y_pred, average=None))
+    #print(roc_auc_score(y_true, y_pred, average=None))
+    print(f'AUC: {roc_auc_score(y_true, y_pred, average=None)}')
+    print(f'F1: {f1_score(y_true, y_pred, average="samples")}')
 
 def main():
     data = pd.read_csv('en-annotated.tsv', sep='\t', names=['text', 'label'])
@@ -186,14 +197,13 @@ def main():
     dd = pd.DataFrame.from_dict(after_tokenize)
     dd.to_csv ('help.tsv', sep='\t', index=False)
 
-    df = pd.DataFrame.from_dict(data['label'].values.ravel())[0]
+    df = data['label']
 
-    lex = emotions.build_lexicon()
     xd = data['text']
     
     #print(get_emocnt_pct(xd))
     #get_intensity_per_emo(data)
-    get_dataset_stats(df)
+    #get_dataset_stats(df)
 
     train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df, test_size=0.1, stratify=df.str.replace(' ', '').str.split(',').apply(lambda x: x[0]), random_state=42)
     train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
