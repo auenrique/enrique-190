@@ -15,6 +15,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MultiLabelBinarizer
 from scipy.sparse import hstack
 from sklearn.metrics import roc_auc_score
+import matplotlib.pyplot as plt
 
 import tokenizer
 import emotions
@@ -151,7 +152,7 @@ def train_model(train_X, train_y, test_X, test_y, use_intensity):
 
     test = clf.predict(XX)
 
-    get_clf_metrics(clf, yy, test, features)
+    return get_clf_metrics(clf, yy, test, features)
 
 def get_clf_metrics(clf, y_true, y_pred, features):
     target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
@@ -164,26 +165,104 @@ def get_clf_metrics(clf, y_true, y_pred, features):
         sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
 
     print(features)
+    emoint_dict = {
+        'anger': {},
+        'anticipation': {},
+        'disgust': {},
+        'fear': {},
+        'joy': {},
+        'sadness': {},
+        'surprise': {},
+        'trust': {}
+    }
     for i in range(0, len(clf.estimators_)):
         print(f'\nEmotion: {target_names[i]}')
         ngram = []
         emo_int = []
+        
         j=0
         for feature, importance in sorted_feature_importance[i]:
             if(feature in emo):
                 emo_int.append(f'\tFeature: {feature}, Importance: {importance}')
+                match i:
+                    case 0:
+                        emoint_dict['anger'][feature] = importance
+                    case 1:
+                        emoint_dict['anticipation'][feature] = importance
+                    case 2:
+                        emoint_dict['disgust'][feature] = importance
+                    case 3:
+                        emoint_dict['fear'][feature] = importance
+                    case 4:
+                        emoint_dict['joy'][feature] = importance
+                    case 5:
+                        emoint_dict['sadness'][feature] = importance
+                    case 6:
+                        emoint_dict['surprise'][feature] = importance
+                    case 7:
+                        emoint_dict['trust'][feature] = importance
             if(len(ngram)<10 and feature not in emo):
                 ngram.append(f'\tFeature: {feature}, Importance: {importance}')
-            
         for n in ngram:
             print(n)
         for e in emo_int:
             print(e)
+    #if emoint_dict is filled, call visualize_importance(emoint_dict)
+    if emoint_dict['anger']:
+        visualize_importance(emoint_dict)
 
     print(classification_report(y_true, y_pred, target_names=target_names, zero_division=0.0))
     #print(roc_auc_score(y_true, y_pred, average=None))
     print(f'AUC: {roc_auc_score(y_true, y_pred, average=None)}')
     print(f'F1: {f1_score(y_true, y_pred, average="samples")}')
+
+    return(classification_report(y_true, y_pred, target_names=target_names, output_dict=True, zero_division=0.0))
+
+def visualize_importance(emos):
+    #create heatmap
+    fig, ax = plt.subplots()
+    #arrange values in a list of lists
+    arr = [[0 for _ in range(8)] for _ in range(8)]
+    emotions = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
+    emo_int = ['anger_int', 'anticipation_int', 'disgust_int', 'fear_int', 'joy_int', 'sadness_int', 'surprise_int', 'trust_int']
+    for i, emotion in enumerate(emotions):
+        for j, (feature, importance) in enumerate(emos[emotion].items()):
+            match feature:
+                case 'raw_anger':
+                    arr[i][0] = importance
+                case 'raw_anticipation':
+                    arr[i][1] = importance
+                case 'raw_disgust':
+                    arr[i][2] = importance
+                case 'raw_fear':
+                    arr[i][3] = importance
+                case 'raw_joy':
+                    arr[i][4] = importance
+                case 'raw_sadness':
+                    arr[i][5] = importance
+                case 'raw_surprise':
+                    arr[i][6] = importance
+                case 'raw_trust':
+                    arr[i][7] = importance
+
+    plt.subplots_adjust(bottom=0.271, top=0.895, right=0.874, left=0.124)
+    im = ax.imshow(arr)
+    ax.set_xticks(np.arange(len(emos['anger'])))
+    ax.set_yticks(np.arange(8))
+    ax.set_xticklabels(emo_int)
+    ax.set_yticklabels(emotions)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    for i in range(8):
+        for j in range(len(emos['anger'])):
+            text = ax.text(j, i, round(arr[i][j], 2), ha="center", va="center", color="w")
+    #add colorbar
+    cbar = ax.figure.colorbar(im, ax=ax)
+    cbar.ax.set_ylabel('Feature Importance', rotation=-90, va="bottom")
+    ax.set_title('Emotion Intensity Importance')
+    #add title to x and y axis
+    ax.set_xlabel('Emotion Intensity Values')
+    ax.set_ylabel('Emotion Labels')
+    plt.show()
 
 def main():
     data = pd.read_csv('en-annotated.tsv', sep='\t', names=['text', 'label'])
@@ -224,8 +303,8 @@ def main():
 
     train_y = train_dev_y.reset_index(drop=True)
 
-    train_model(train_X, train_y, test_X, test_y, True)
-    train_model(train_X, train_y, test_X, test_y, False)
+    cr_int = train_model(train_X, train_y, test_X, test_y, True)
+    cr_noint = train_model(train_X, train_y, test_X, test_y, False)
 
 if __name__ == "__main__":
     main()
