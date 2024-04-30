@@ -23,6 +23,26 @@ def build_lexicon():
 
     return lex
 
+def show_lexicon_stats(lex):
+    emotions = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
+    emotion_counts = {emotion: 0 for emotion in emotions}
+    for word in lex.keys():
+        for emotion in lex[word].keys():
+            emotion_counts[emotion] += 1
+    #get number of words in lexicon
+    word_count = len(lex.keys())
+    print('Number of words in lexicon: ', word_count)
+    #get number of emotions in lexicon
+    emotion_count = len(emotions)
+    #get sum of emotion counts
+    emotion_sum = sum(emotion_counts.values())
+    print('Number of unique intensity values: ', emotion_sum)
+    #get proportion
+    for emotion in emotion_counts:
+        emotion_counts[emotion] = emotion_counts[emotion]/emotion_sum
+    print(emotion_counts)
+
+
 #def build_lexicon_from_text(text, lex):
 
 def search_lexicon(word, lex):

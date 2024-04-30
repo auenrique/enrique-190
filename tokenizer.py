@@ -56,6 +56,14 @@ def tokenize_nostem(text):
     text_arr = tokenize(text)
     return text_arr
 
+def tokenize_nostem_lem(text):
+    text = text.lower()
+    text = remove_punctuation(text)
+    text_arr = tokenize(text)
+    lemmatizer = nltk.WordNetLemmatizer()
+    text_arr = lemmatizer_func(lemmatizer, text_arr)
+    return text_arr
+
 def tokenize_fromdf(data,fast):
     tokenized = dict()
     if(fast):

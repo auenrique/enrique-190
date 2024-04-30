@@ -85,41 +85,95 @@ def get_dataset_stats(data):
 
 def get_emocnt_pct(data):
     lex = emotions.build_lexicon()
-    emowdcnt = emotions.get_emoword_cnt(data.apply(lambda x: tokenizer.tokenize_nostem(x)), lex)
+    emotions.show_lexicon_stats(lex)
+    emowdcnt = emotions.get_emoword_cnt(data['text'].apply(lambda x: tokenizer.tokenize_nostem_lem(x)), lex)
     total = 0
     cnt = 0
     for i in range(0, len(emowdcnt)):
         total += 1
         if emowdcnt[i] > 0:
             cnt += 1
-    return cnt/total
+    peremo = True
+    
+    if(peremo):
+        peremocnt = [0] * 8
+        peremototal = [0] * 8
+        labels = data['label'].str.replace(' ', '').str.split(',')
+        index = 0
+        for label in labels:
+            for i in range(0, len(label)):
+                emo = int(label[i])-1
+                if emowdcnt[index] > 0:                 
+                    peremocnt[emo] += 1
+                peremototal[emo] += 1
+            index += 1
+        #get percentage of sentences with emotion words
+        for i in range(0, 8):
+            print(f'{i+1}: {peremocnt[i]/peremototal[i]*100}%')
+        #create bar graph
+        fig, ax = plt.subplots()
+        plt.subplots_adjust(bottom=0.2)
+        emolabel = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust', 'total']
+        x = np.arange(len(emolabel))
+        width = 0.35
+        rects1 = ax.bar(x, [(peremocnt[i]/peremototal[i])*100 for i in range(8)] + [cnt/total*100], width, label='With Emotion Words')
+        rects2 = ax.bar(x, [(peremototal[i]-peremocnt[i])/peremototal[i]*100 for i in range(8)] + [(total-cnt)/total*100], width, bottom=[(peremocnt[i]/peremototal[i])*100 for i in range(8)] + [cnt/total*100], label='Without Emotion Words')
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+        ax.set_ylabel('Percentage')
+        ax.set_title('Percentage of Sentences with Emotion Words')
+        ax.set_xticks(x)
+        ax.set_xticklabels(emolabel)
+        ax.legend()
+        plt.show()
 
 def get_intensity_per_emo(data):
     lex = emotions.build_lexicon()
     emoval = pd.DataFrame.from_dict(emotions.get_emotion_features(data['text'].apply(lambda x: tokenizer.tokenize_nostem(x)), lex))
+    emowdcnt = emotions.get_emoword_cnt(data['text'].apply(lambda x: tokenizer.tokenize_nostem(x)), lex)
     labels = data['label'].str.replace(' ', '').str.split(',')
     index = 0
     # get average intensity for each label
     avg = [[0 for _ in range(8)] for _ in range(8)]
     avgcnt = [0] * 8
     for label in labels:
-        for i in range(0, len(label)):
-            emo = int(label[i])-1
-            avg[emo][0] += emoval.iloc[index]['raw_anger']
-            avg[emo][1] += emoval.iloc[index]['raw_anticipation']
-            avg[emo][2] += emoval.iloc[index]['raw_disgust']
-            avg[emo][3] += emoval.iloc[index]['raw_fear']
-            avg[emo][4] += emoval.iloc[index]['raw_joy']
-            avg[emo][5] += emoval.iloc[index]['raw_sadness']
-            avg[emo][6] += emoval.iloc[index]['raw_surprise']
-            avg[emo][7] += emoval.iloc[index]['raw_trust']
-            avgcnt[emo] += 1
+        if emowdcnt[index] > 0:
+            for i in range(0, len(label)):
+                emo = int(label[i])-1
+                avg[emo][0] += emoval.iloc[index]['raw_anger']
+                avg[emo][1] += emoval.iloc[index]['raw_anticipation']
+                avg[emo][2] += emoval.iloc[index]['raw_disgust']
+                avg[emo][3] += emoval.iloc[index]['raw_fear']
+                avg[emo][4] += emoval.iloc[index]['raw_joy']
+                avg[emo][5] += emoval.iloc[index]['raw_sadness']
+                avg[emo][6] += emoval.iloc[index]['raw_surprise']
+                avg[emo][7] += emoval.iloc[index]['raw_trust']
+                avgcnt[emo] += 1
         index += 1
     for i in range(0, 8):
         for j in range(0, 8):
             avg[i][j] /= avgcnt[i]
         print(avg[i])
         print(avgcnt[i])
+    #create heatmap
+    fig, ax = plt.subplots()
+    plt.subplots_adjust(bottom=0.271, top=0.895, right=0.874, left=0.124)
+    im = ax.imshow(avg)
+    ax.set_xticks(np.arange(8))
+    ax.set_yticks(np.arange(8))
+    ax.set_xticklabels(['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust'])
+    ax.set_yticklabels(['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust'])
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    for i in range(8):
+        for j in range(8):
+            text = ax.text(j, i, round(avg[i][j], 2), ha="center", va="center", color="w")
+    #add colorbar
+    cbar = ax.figure.colorbar(im, ax=ax)
+    cbar.ax.set_ylabel('Average Intensity', rotation=-90, va="bottom")
+    ax.set_title('Average Intensity per Emotion')
+    #add title to x and y axis
+    ax.set_xlabel('Emotion Intensity Values')
+    ax.set_ylabel('Emotion Labels')    
+    plt.show()
 
 def train_model(train_X, train_y, test_X, test_y, use_intensity):
     vec = CountVectorizer(analyzer='word',ngram_range=(1,3))
@@ -136,8 +190,8 @@ def train_model(train_X, train_y, test_X, test_y, use_intensity):
     features = vec.get_feature_names_out()
 
     if use_intensity:
-        tok_Xtrain = train_X.apply(lambda x: tokenizer.tokenize_nostem(x))
-        tok_Xtest = test_X.apply(lambda x: tokenizer.tokenize_nostem(x))
+        tok_Xtrain = train_X.apply(lambda x: tokenizer.tokenize_nostem_lem(x))
+        tok_Xtest = test_X.apply(lambda x: tokenizer.tokenize_nostem_lem(x))
 
         lex = emotions.build_lexicon()
         emo_Xtrain = emotions.get_emotion_features(tok_Xtrain, lex)
@@ -164,7 +218,17 @@ def get_clf_metrics(clf, y_true, y_pred, features):
         feature_importance = dict(zip(features, imp))
         sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
 
-    print(features)
+    for i in range(0, len(clf.estimators_)):
+        imp = clf.estimators_[i].coef_[0]
+        #remove last 8 features which are emotion intensity values
+        imp = imp[:-8]
+        #get absolute value of importance
+        impabs = np.abs(imp)
+        feature_importance = dict(zip(features, imp))
+        top10 = np.argsort(impabs)[-10:]
+        print(f"Top features for label {target_names[i]}:")
+        print([{features[j], imp[j]} for j in top10])
+
     emoint_dict = {
         'anger': {},
         'anticipation': {},
@@ -176,7 +240,7 @@ def get_clf_metrics(clf, y_true, y_pred, features):
         'trust': {}
     }
     for i in range(0, len(clf.estimators_)):
-        print(f'\nEmotion: {target_names[i]}')
+        #print(f'\nEmotion: {target_names[i]}')
         ngram = []
         emo_int = []
         
@@ -203,10 +267,10 @@ def get_clf_metrics(clf, y_true, y_pred, features):
                         emoint_dict['trust'][feature] = importance
             if(len(ngram)<10 and feature not in emo):
                 ngram.append(f'\tFeature: {feature}, Importance: {importance}')
-        for n in ngram:
-            print(n)
-        for e in emo_int:
-            print(e)
+        # for n in ngram:
+        #     print(n)
+        # for e in emo_int:
+        #     print(e)
     #if emoint_dict is filled, call visualize_importance(emoint_dict)
     if emoint_dict['anger']:
         visualize_importance(emoint_dict)
@@ -276,13 +340,18 @@ def main():
     dd = pd.DataFrame.from_dict(after_tokenize)
     dd.to_csv ('help.tsv', sep='\t', index=False)
 
+    # emowdcnt = emotions.get_emoword_cnt(data['text'].apply(lambda x: tokenizer.tokenize_nostem(x)), emotions.build_lexicon())
+
+    # #drop rows with no emotion words
+    # data = data[emowdcnt > 0].reset_index(drop=True)
+
     df = data['label']
 
     xd = data['text']
     
-    #print(get_emocnt_pct(xd))
-    #get_intensity_per_emo(data)
-    #get_dataset_stats(df)
+    print(get_emocnt_pct(data))
+    get_intensity_per_emo(data)
+    get_dataset_stats(df)
 
     train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df, test_size=0.1, stratify=df.str.replace(' ', '').str.split(',').apply(lambda x: x[0]), random_state=42)
     train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
