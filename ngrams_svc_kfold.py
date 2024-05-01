@@ -105,8 +105,8 @@ def main():
 
     #train_model(data, True)
 
-    clf_emo = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.05, random_state=42))
-    clf_noemo = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.05, random_state=42))
+    clf_emo = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.01, random_state=42))
+    clf_noemo = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.01, random_state=42))
 
     classification_reports_emo = []
     classification_reports_noemo = []
@@ -162,26 +162,26 @@ def main():
         auc_scores_noemo.append(roc_auc_score(yy, clf_noemo.decision_function(XX)))
 
     print('Emotion')
-    print('Anger: %.2f' % (sum(report['anger']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Anticipation: %.2f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Disgust: %.2f' % (sum(report['disgust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Fear: %.2f' % (sum(report['fear']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Joy: %.2f' % (sum(report['joy']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Sadness: %.2f' % (sum(report['sadness']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Surprise: %.2f' % (sum(report['surprise']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Trust: %.2f' % (sum(report['trust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
-    print('Macro Avg: %.2f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Anger: %.4f' % (sum(report['anger']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Anticipation: %.4f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Disgust: %.4f' % (sum(report['disgust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Fear: %.4f' % (sum(report['fear']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Joy: %.4f' % (sum(report['joy']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Sadness: %.4f' % (sum(report['sadness']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Surprise: %.4f' % (sum(report['surprise']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Trust: %.4f' % (sum(report['trust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
+    print('Macro Avg: %.4f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
 
     print('No Emotion')
-    print('Anger: %.2f' % (sum(report['anger']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Anticipation: %.2f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Disgust: %.2f' % (sum(report['disgust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Fear: %.2f' % (sum(report['fear']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Joy: %.2f' % (sum(report['joy']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Sadness: %.2f' % (sum(report['sadness']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Surprise: %.2f' % (sum(report['surprise']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Trust: %.2f' % (sum(report['trust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
-    print('Macro Avg: %.2f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Anger: %.4f' % (sum(report['anger']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Anticipation: %.4f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Disgust: %.4f' % (sum(report['disgust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Fear: %.4f' % (sum(report['fear']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Joy: %.4f' % (sum(report['joy']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Sadness: %.4f' % (sum(report['sadness']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Surprise: %.4f' % (sum(report['surprise']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Trust: %.4f' % (sum(report['trust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Macro Avg: %.4f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
 
     # Assuming classification_reports_emo and classification_reports_noemo are lists of dictionaries containing the classification reports
     f1_scores_emo = [report['macro avg']['f1-score'] for report in classification_reports_emo]
@@ -226,7 +226,7 @@ def main():
     print(f"AUC\t{t_stat}\t{p_val}")
 
 
-
+    print(len(classification_reports_emo))
 
     #t_stat, p_val = stats.ttest_rel(f1_scores_emo, f1_scores_noemo)
     #todo

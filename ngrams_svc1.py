@@ -155,6 +155,8 @@ def get_intensity_per_emo(data):
         print(avg[i])
         print(avgcnt[i])
     #create heatmap
+    #switch x and y axis
+    avg = np.array(avg).T
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.271, top=0.895, right=0.874, left=0.124)
     im = ax.imshow(avg)
@@ -171,8 +173,8 @@ def get_intensity_per_emo(data):
     cbar.ax.set_ylabel('Average Intensity', rotation=-90, va="bottom")
     ax.set_title('Average Intensity per Emotion')
     #add title to x and y axis
-    ax.set_xlabel('Emotion Intensity Values')
-    ax.set_ylabel('Emotion Labels')    
+    ax.set_ylabel('Emotion Intensity Values')
+    ax.set_xlabel('Emotion Labels')    
     plt.show()
 
 def train_model(train_X, train_y, test_X, test_y, use_intensity):
@@ -321,7 +323,7 @@ def visualize_importance(emos):
             text = ax.text(j, i, round(arr[i][j], 2), ha="center", va="center", color="w")
     #add colorbar
     cbar = ax.figure.colorbar(im, ax=ax)
-    cbar.ax.set_ylabel('Feature Importance', rotation=-90, va="bottom")
+    cbar.ax.set_ylabel('SVM Coefficient', rotation=-90, va="bottom")
     ax.set_title('Emotion Intensity Importance')
     #add title to x and y axis
     ax.set_xlabel('Emotion Intensity Values')
