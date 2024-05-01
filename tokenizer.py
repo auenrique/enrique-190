@@ -8,13 +8,13 @@ import spacy
 def remove_punctuation(text):
     no_punct = "".join([c for c in text if c not in string.punctuation])
     #remove numbers
-    no_punct = re.sub('\d+', '', no_punct)
+    no_punct = re.sub(r'\d+', '', no_punct)
     no_punct = no_punct.replace('\n', ' ')
     no_punct = no_punct.strip()
     return no_punct
 
 def tokenize(text):
-    tokens = re.split('\W+', text)
+    tokens = re.split(r'\W+', text)
     return tokens
 
 def remove_stopwords(stopword, tokenized_list):
