@@ -217,19 +217,23 @@ def get_clf_metrics(clf, y_true, y_pred, features):
     sorted_feature_importance = [None] * len(clf.estimators_)
     for i in range(0, len(clf.estimators_)):
         imp = clf.estimators_[i].coef_[0]
-        feature_importance = dict(zip(features, imp))
-        sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
-
-    for i in range(0, len(clf.estimators_)):
-        imp = clf.estimators_[i].coef_[0]
         #remove last 8 features which are emotion intensity values
         imp = imp[:-8]
+        feat_noemo = features[:-8]
         #get absolute value of importance
-        impabs = np.abs(imp)
+        feature_importance = dict(zip(feat_noemo, imp))
+        sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
+        #get top 10 and bottom 10 features
+        print(f"\nTop features for label {target_names[i]}:")
+        for feature, importance in sorted_feature_importance[i][:5]:
+            print(f'\tFeature: {feature}, Importance: {importance}')
+        print(f"\nBottom features for label {target_names[i]}:")
+        for feature, importance in sorted_feature_importance[i][-5:]:
+            print(f'\tFeature: {feature}, Importance: {importance}')
+    for i in range(0, len(clf.estimators_)):
+        imp = clf.estimators_[i].coef_[0]
         feature_importance = dict(zip(features, imp))
-        top10 = np.argsort(impabs)[-10:]
-        print(f"Top features for label {target_names[i]}:")
-        print([{features[j], imp[j]} for j in top10])
+        sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
 
     emoint_dict = {
         'anger': {},

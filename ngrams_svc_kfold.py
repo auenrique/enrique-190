@@ -172,7 +172,7 @@ def main():
     print('Trust: %.4f' % (sum(report['trust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
     print('Macro Avg: %.4f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
 
-    print('No Emotion')
+    print('\nNo Emotion')
     print('Anger: %.4f' % (sum(report['anger']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
     print('Anticipation: %.4f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
     print('Disgust: %.4f' % (sum(report['disgust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
@@ -182,6 +182,17 @@ def main():
     print('Surprise: %.4f' % (sum(report['surprise']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
     print('Trust: %.4f' % (sum(report['trust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
     print('Macro Avg: %.4f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+
+    print('\nDifference')
+    print('Anger: %.4f' % (sum(report['anger']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['anger']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Anticipation: %.4f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['anticipation']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Disgust: %.4f' % (sum(report['disgust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['disgust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Fear: %.4f' % (sum(report['fear']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['fear']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Joy: %.4f' % (sum(report['joy']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['joy']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Sadness: %.4f' % (sum(report['sadness']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['sadness']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Surprise: %.4f' % (sum(report['surprise']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['surprise']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Trust: %.4f' % (sum(report['trust']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['trust']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
+    print('Macro Avg: %.4f' % (sum(report['macro avg']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo) - sum(report['macro avg']['f1-score'] for report in classification_reports_noemo)/len(classification_reports_noemo)))
 
     # Assuming classification_reports_emo and classification_reports_noemo are lists of dictionaries containing the classification reports
     f1_scores_emo = [report['macro avg']['f1-score'] for report in classification_reports_emo]
