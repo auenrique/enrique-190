@@ -16,6 +16,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from scipy.sparse import hstack
 from scipy import stats
 from sklearn.metrics import roc_auc_score
+import matplotlib.pyplot as plt
 
 import tokenizer
 import emotions
@@ -213,6 +214,51 @@ def main():
     sur_scores_noemo = [report['surprise']['f1-score'] for report in classification_reports_noemo]
     tru_scores_emo = [report['trust']['f1-score'] for report in classification_reports_emo]
     tru_scores_noemo = [report['trust']['f1-score'] for report in classification_reports_noemo]
+
+    avg_f1_emo = sum(f1_scores_emo)/len(f1_scores_emo)
+    avg_f1_noemo = sum(f1_scores_noemo)/len(f1_scores_noemo)
+    avg_ang_emo = sum(ang_scores_emo)/len(ang_scores_emo)
+    avg_ang_noemo = sum(ang_scores_noemo)/len(ang_scores_noemo)
+    avg_ant_emo = sum(ant_scores_emo)/len(ant_scores_emo)
+    avg_ant_noemo = sum(ant_scores_noemo)/len(ant_scores_noemo)
+    avg_dis_emo = sum(dis_scores_emo)/len(dis_scores_emo)
+    avg_dis_noemo = sum(dis_scores_noemo)/len(dis_scores_noemo)
+    avg_fear_emo = sum(fear_scores_emo)/len(fear_scores_emo)
+    avg_fear_noemo = sum(fear_scores_noemo)/len(fear_scores_noemo)
+    avg_joy_emo = sum(joy_scores_emo)/len(joy_scores_emo)
+    avg_joy_noemo = sum(joy_scores_noemo)/len(joy_scores_noemo)
+    avg_sad_emo = sum(sad_scores_emo)/len(sad_scores_emo)
+    avg_sad_noemo = sum(sad_scores_noemo)/len(sad_scores_noemo)
+    avg_sur_emo = sum(sur_scores_emo)/len(sur_scores_emo)
+    avg_sur_noemo = sum(sur_scores_noemo)/len(sur_scores_noemo)
+    avg_tru_emo = sum(tru_scores_emo)/len(tru_scores_emo)
+    avg_tru_noemo = sum(tru_scores_noemo)/len(tru_scores_noemo)
+
+    #make bar graph
+    emos = ['Macro Average', 'Anger', 'Anticipation', 'Disgust', 'Fear', 'Joy', 'Sadness', 'Surprise', 'Trust']
+    # Assuming 'emo_scores' and 'noemo_scores' are the average scores for each emotion
+    emo_scores = [avg_f1_emo, avg_ang_emo, avg_ant_emo, avg_dis_emo, avg_fear_emo, avg_joy_emo, avg_sad_emo, avg_sur_emo, avg_tru_emo]
+    noemo_scores = [avg_f1_noemo, avg_ang_noemo, avg_ant_noemo, avg_dis_noemo, avg_fear_noemo, avg_joy_noemo, avg_sad_noemo, avg_sur_noemo, avg_tru_noemo]
+
+    x = np.arange(len(emos))  # the label locations
+    width = 0.35  # the width of the bars
+
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x - width/2, emo_scores, width, label='With Emotion Intensities')
+    rects2 = ax.bar(x + width/2, noemo_scores, width, label='Without Emotion Intensities')
+    ax.set_ylim(0, 0.7)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('F1 score')
+    ax.set_title('F1 scores for each label')
+    ax.set_xticks(x)
+    ax.set_xticklabels(emos)
+
+    ax.legend()
+
+    fig.tight_layout()
+
+    plt.show()
 
     print(f"Emotion\tT-statistic\tP-value")
     t_stat, p_val = stats.ttest_rel(f1_scores_emo, f1_scores_noemo)
