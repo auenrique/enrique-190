@@ -1,3 +1,5 @@
+# contains generic preprocessing functions
+
 import numpy as np
 import nltk
 import string
@@ -34,13 +36,11 @@ def stemmer_func(tokenized_text):
     return text
 
 
-def tokenize_stream(text, stopword, lemmatizer):
+def tokenize_stream(text):
     text = text.lower()
     text = remove_punctuation(text)    
     text_arr = tokenize(text)
     text_arr = stemmer_func(text_arr)
-    #text_arr = remove_stopwords(stopword, text_arr)
-    #text_arr = lemmatizer_func(lemmatizer, text_arr)
     
     return text_arr
 
@@ -68,12 +68,11 @@ def tokenize_fromdf(data,fast):
     if(fast):
         tokenized = dict()
         tokenized["text"] = data["text"]
-        stopword = nltk.corpus.stopwords.words('english')
-        lemmatizer = nltk.WordNetLemmatizer()
-        tokenized["tokenized"] = tokenized["text"].apply(lambda x: tokenize_stream(x, stopword, lemmatizer))
+        tokenized["tokenized"] = tokenized["text"].apply(lambda x: tokenize_stream(x))
         tokenized["tok_nostem"] = tokenized["text"].apply(lambda x: tokenize_nostem(x))
         tokenized["preprocessed"] = tokenized["tokenized"].apply(lambda x: preprocess_stream(x))
         tokenized["label"] = data["label"]
+    #verbose
     else:
         tokenized["text"] = data["text"]
         print('removing special characters...')
@@ -105,9 +104,10 @@ def tokenize_data(data,fast):
         tokenized["text"] = data
         stopword = nltk.corpus.stopwords.words('english')
         lemmatizer = nltk.WordNetLemmatizer()
-        tokenized["tokenized"] = tokenized["text"].apply(lambda x: tokenize_stream(x, stopword, lemmatizer))
+        tokenized["tokenized"] = tokenized["text"].apply(lambda x: tokenize_stream(x))
         tokenized["tok_nostem"] = tokenized["text"].apply(lambda x: tokenize_nostem(x))
         tokenized["preprocessed"] = tokenized["tokenized"].apply(lambda x: preprocess_stream(x))
+    #verbose
     else:
         tokenized["text"] = data["text"]
         print('removing special characters...')
@@ -128,12 +128,6 @@ def tokenize_data(data,fast):
 
     return tokenized
 
-#only returns final result of tokenization
-def tokenize_result(data):
-    tokenize = dict()
-
-    return tokenize
-
 def tokener():
     data  =  pd.read_csv('dev.tsv', sep='\t')
     data.head()
@@ -151,17 +145,6 @@ def tokener():
     df2.to_csv ('devp_partial.tsv', sep='\t', index=False)
 
 def main():
-    #tokener()
-    # string = "We must protect these investments so the area can continue to prosper and grow ."
-    # string1 = remove_punctuation(string).lower()
-    # string2 = tokenize(string1)
-    # string3 = remove_stopwords(nltk.corpus.stopwords.words('english'), string2)
-    # string4 = lemmatizer_func(nltk.WordNetLemmatizer(), string3)
-
-    # print(string)
-    # print(string1)
-    # print(string2)
-    # print(string4)
     tokener()
 
 if __name__ == "__main__":

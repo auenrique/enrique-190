@@ -1,14 +1,7 @@
-import os
-import numpy as np
-import pandas as pd
-
-import tokenizer
-
-path = ''
-
+# contains functions for emotion feature extraction using the NRC Emotion Intensity Lexicon
 def build_lexicon():
     # Open NRC lexicon
-    with open('NRC-Emotion-Intensity-Lexicon-v1.txt', 'r') as f:
+    with open('data/NRC-Emotion-Intensity-Lexicon-v1.txt', 'r') as f:
         lexicon = f.readlines()
 
     # Create dictionary to store lexicon
@@ -22,6 +15,7 @@ def build_lexicon():
 
     return lex
 
+# provides an overview of the lexicon (table 1)
 def show_lexicon_stats(lex):
     emotions = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
     emotion_counts = {emotion: 0 for emotion in emotions}
@@ -41,15 +35,14 @@ def show_lexicon_stats(lex):
         emotion_counts[emotion] = emotion_counts[emotion]/emotion_sum
     print(emotion_counts)
 
-
-#def build_lexicon_from_text(text, lex):
-
+# search lexicon for a word, returns intensity values for each emotion
 def search_lexicon(word, lex):
     if word in lex.keys():
         return lex[word]
     else:
         return None
-    
+
+# build raw score by adding intensity values of each word in text
 def build_raw_score(text, lex):
     raw = {}
     raw['raw_anger'] = 0
@@ -68,6 +61,8 @@ def build_raw_score(text, lex):
                 raw['raw_'+emotion] += search_lexicon(word, lex)[emotion]
     return raw
 
+#unused in study
+#return list of words in text that appear in lexicon
 def get_emotion_words (text, lex):
     emotion_words = []
     for word in text:
@@ -80,6 +75,8 @@ def get_emotion_words (text, lex):
                     is_emotional = True
     return emotion_words
 
+#unused in study
+#return % of words in text that appear in lexicon
 def get_emotionality (text, lex):
     emotion_words = get_emotion_words(text, lex)
     emotion_word_cnt = len(emotion_words)
@@ -89,6 +86,9 @@ def get_emotionality (text, lex):
     emotionality = emotion_word_cnt/total_words
     return emotionality
 
+#unused in study
+#return average intensity of each emotion in text
+#avg = total intensity of emotion / number of emotion words
 def get_avg_emotion (text, lex):
     raw = build_raw_score(text, lex)
     emotion_words = get_emotion_words(text, lex)
@@ -107,6 +107,9 @@ def get_avg_emotion (text, lex):
 
     return avg
 
+#unused in study
+#return % of each emotion in text
+#% = total intensity of emotion / total intensity of all emotions
 def get_pct_emotion(text,lex):
     raw = build_raw_score(text, lex)
     raw_sum = raw['raw_anger'] + raw['raw_anticipation'] + raw['raw_disgust'] + raw['raw_fear'] + raw['raw_joy'] + raw['raw_sadness'] + raw['raw_surprise'] + raw['raw_trust']
@@ -124,22 +127,7 @@ def get_pct_emotion(text,lex):
 
     return pct
 
-def get_pct_sentiment(text,lex):
-    raw = build_raw_score(text, lex)
-    raw_sum = raw['raw_negative'] + raw['raw_positive']
-    pct = {}
-    if(raw_sum == 0):
-        raw_sum = 1
-    pct['pct_negative'] = raw['raw_negative']/raw_sum
-    pct['pct_positive'] = raw['raw_positive']/raw_sum
-
-    return pct
-
-def get_emotion_pct(data):
-    print(data)
-    # for thing in data:
-    #     print(data[thing])
-
+#return number of words in text that appear in lexicon
 def get_emoword_cnt(data,lex):
     emotion_words = data.apply(lambda x: get_emotion_words(x, lex))
     for i in range(len(emotion_words)):
@@ -148,68 +136,13 @@ def get_emoword_cnt(data,lex):
 
 def get_emotion_features (data, lex):
     emotion_features = dict()
-    #copy data to emotion_features
-
-    #add emotion features to emotion_features
-    #print('getting raw scores...')
     raw_scores = data.apply(lambda x: build_raw_score(x, lex))
     for emotion in raw_scores[0]:
         emotion_features[emotion] = raw_scores.apply(lambda x: x[emotion])
-    #emotion_features = pd.concat([emotion_features, raw_scores.apply(pd.Series)], axis=1)
-    #print(raw_scores)
-    #raw_scores.index = ['raw_anger', 'raw_anticipation', 'raw_disgust', 'raw_fear', 'raw_joy', 'raw_negative', 'raw_positive', 'raw_sadness', 'raw_surprise', 'raw_trust']
-    # print('getting emotion word count...')
-    # emotion_words = emotion_features['preprocessed'].apply(lambda x: get_emotion_words(x, lex))
-    # emotion_features['emotion_words'] = emotion_words
-
-    # print('getting emotionality...')
-    # emotionality = data.apply(lambda x: get_emotionality(x, lex))
-    # emotion_features['emotionality'] = emotionality
-
-    # print('getting avg emotion scores...')
-    # avg_emotion_scores = data.apply(lambda x: get_avg_emotion(x, lex))
-    # for emotion in avg_emotion_scores[0]:
-    #     emotion_features[emotion] = avg_emotion_scores.apply(lambda x: x[emotion])
-
-    # print('getting emotion percentages...')
-    # pct_emotion_scores = data.apply(lambda x: get_pct_emotion(x, lex))
-    # for emotion in pct_emotion_scores[0]:
-    #     emotion_features[emotion] = pct_emotion_scores.apply(lambda x: x[emotion])
-
-    # print('getting sentiment percentages...')
-    # pct_sentiment_scores = emotion_features['preprocessed'].apply(lambda x: get_pct_sentiment(x, lex))
-    # for sentiment in pct_sentiment_scores[0]:
-    #     emotion_features[sentiment] = pct_sentiment_scores.apply(lambda x: x[sentiment])
-
-    #print(emotion_features)
-    # print(raw_scores[3])
-    # print(emotion_word_count[3])
-    # print(emotionality[3])
-    # print(avg_emotion_scores[3])
-    # print(pct_emotion_scores[3])
     return emotion_features
     
-
 def main():
-    data  =  pd.read_csv('devp_partial.tsv', sep='\t')
-    data.head()
-
-    # Check if there are any missing values.
-    data.isnull().sum()
-
     lex = build_lexicon()
-
-    after_tokenize = tokenizer.tokenize_data(data, True)
-
-    emo_features = get_emotion_features(after_tokenize, lex)
-    #print(emo_features)
-    
-    df = pd.DataFrame.from_dict(emo_features) 
-    df.to_csv (r'emotest.csv', index = False, header=True)
-    
-    #print(data["preprocessed"][0][0])
-    # df = pd.DataFrame.from_dict(after_tokenize) 
-    # df.to_csv (r'gen.csv', index = False, header=True)
 
 if __name__ == "__main__":
     main()

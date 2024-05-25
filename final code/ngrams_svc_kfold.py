@@ -1,3 +1,5 @@
+#stratified kfold implementation of linearsvc model with n-grams and emotion features, used for model stats and t-test
+
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.multiclass import OneVsRestClassifier
@@ -14,90 +16,17 @@ import matplotlib.pyplot as plt
 import tokenizer
 import emotions
 
-def count_labels(data):
-    #print(data)
-    labels = {}
-    for i in range(1,9):
-        labels[i] = 0
-    for i in data:
-        for j in range(1,9):
-            if str(j) in i:
-                labels[j] += 1
-    return labels
-
-def train_model(data, use_intensity):
-    clf = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.05, random_state=42))
-    classification_reports = []
-
-    data.head()
-    data = data.reset_index(drop=True)
-
-    x = data['text']
-    y = data['label']
-    #print(X.shape, y.shape)
-
-    for train_index, test_index in StratifiedKFold(n_splits=10, random_state=42, shuffle=True).split(x, y.str.replace(' ', '').str.split(',').apply(lambda x: x[0])):
-        train_X, test_X = x[train_index], x[test_index]
-        train_y, test_y = y[train_index], y[test_index]
-
-        train_X = train_X.reset_index(drop=True)
-        test_X = test_X.reset_index(drop=True)
-
-        preprocess_Xtrain = tokenizer.tokenize_data(train_X, True)["preprocessed"]
-        preprocess_Xtest = tokenizer.tokenize_data(test_X, True)["preprocessed"]
-
-        vec = CountVectorizer(analyzer='word',ngram_range=(1,3))
-        mlb = MultiLabelBinarizer() 
-
-        X = vec.fit_transform(preprocess_Xtrain)
-        y = mlb.fit_transform(train_y.str.replace(' ', '').str.split(','))
-
-        XX = vec.transform(preprocess_Xtest)
-        yy = mlb.transform(test_y.str.replace(' ', '').str.split(','))
-
-        if(use_intensity):
-            lex = emotions.build_lexicon()
-            tok_Xtrain = train_X.apply(lambda x: tokenizer.tokenize_nostem(x))
-            tok_Xtest = test_X.apply(lambda x: tokenizer.tokenize_nostem(x))
-
-            emo_Xtrain = emotions.get_emotion_features(tok_Xtrain, lex)
-            emo_Xtest = emotions.get_emotion_features(tok_Xtest, lex)
-            X = hstack([X, pd.DataFrame(emo_Xtrain)])
-            XX = hstack([XX, pd.DataFrame(emo_Xtest)])
-
-
-        tok_Xtrain = train_X.apply(lambda x: tokenizer.tokenize_nostem(x))
-        tok_Xtest = test_X.apply(lambda x: tokenizer.tokenize_nostem(x))
-
-        emo_Xtrain = emotions.get_emotion_features(tok_Xtrain, lex)
-        emo_Xtest = emotions.get_emotion_features(tok_Xtest, lex)
-
-        clf.fit(X, y)
-
-        test = clf.predict(XX)
-
-        target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
-        #print(multilabel_confusion_matrix(yy, test),target_names)
-        #print(classification_report(yy, test, target_names=target_names))
-        classification_reports.append(classification_report(yy, test, target_names=target_names, output_dict=True, zero_division=1.0))
-
-    print(sum(report['micro avg']['f1-score'] for report in classification_reports)/len(classification_reports))
-    print(sum(report['macro avg']['f1-score'] for report in classification_reports)/len(classification_reports))
-    print(sum(report['weighted avg']['f1-score'] for report in classification_reports)/len(classification_reports))
-
 def main():
-    data = pd.read_csv('en-annotated.tsv', sep='\t', names=['text', 'label'])
+    data = pd.read_csv('data\en-annotated.tsv', sep='\t', names=['text', 'label'])
     data.head()
 
     # Check if there are any missing values.
     print(data.isnull().sum())
     
-    df = pd.DataFrame.from_dict(data['label'].values.ravel())[0]
+    labeldf = pd.DataFrame.from_dict(data['label'].values.ravel())[0]
 
-    xd = data['text']
+    textdf = data['text']
     lex = emotions.build_lexicon()
-
-    #train_model(data, True)
 
     clf_emo = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.01, random_state=42))
     clf_noemo = OneVsRestClassifier(LinearSVC(dual=True, class_weight='balanced', C=0.01, random_state=42))
@@ -107,9 +36,9 @@ def main():
     auc_scores_emo = []
     auc_scores_noemo = []
 
-    for train_index, test_index in StratifiedKFold(n_splits=10, random_state=42, shuffle=True).split(xd, df.str.replace(' ', '').str.split(',').apply(lambda x: x[0])):
-        train_X, test_X = xd[train_index], xd[test_index]
-        train_y, test_y = df[train_index], df[test_index]
+    for train_index, test_index in StratifiedKFold(n_splits=10, random_state=42, shuffle=True).split(textdf, labeldf.str.replace(' ', '').str.split(',').apply(lambda x: x[0])):
+        train_X, test_X = textdf[train_index], textdf[test_index]
+        train_y, test_y = labeldf[train_index], labeldf[test_index]
 
         train_X = train_X.reset_index(drop=True)
         test_X = test_X.reset_index(drop=True)
@@ -148,13 +77,12 @@ def main():
         test_emo = clf_emo.predict(XX_emo)
 
         target_names = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust']
-        #print(multilabel_confusion_matrix(yy, test),target_names)
-        #print(classification_report(yy, test, target_names=target_names))
         classification_reports_emo.append(classification_report(yy, test_emo, target_names=target_names, output_dict=True, zero_division=1.0))
         classification_reports_noemo.append(classification_report(yy, test_noemo, target_names=target_names, output_dict=True, zero_division=1.0))
         auc_scores_emo.append(roc_auc_score(yy, clf_emo.decision_function(XX_emo)))
         auc_scores_noemo.append(roc_auc_score(yy, clf_noemo.decision_function(XX)))
 
+    #summary of avg f1 scores
     print('Emotion')
     print('Anger: %.4f' % (sum(report['anger']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
     print('Anticipation: %.4f' % (sum(report['anticipation']['f1-score'] for report in classification_reports_emo)/len(classification_reports_emo)))
@@ -253,6 +181,7 @@ def main():
 
     plt.show()
 
+    #10-fold stratified t-test
     print(f"Emotion\tT-statistic\tP-value")
     t_stat, p_val = stats.ttest_rel(f1_scores_emo, f1_scores_noemo)
     print(f"Macro F1\t{t_stat}\t{p_val}")
@@ -273,16 +202,7 @@ def main():
     t_stat, p_val = stats.ttest_rel(tru_scores_emo, tru_scores_noemo)
     print(f"Trust\t{t_stat}\t{p_val}")
     t_stat, p_val = stats.ttest_rel(auc_scores_emo, auc_scores_noemo)
-    print(f"AUC\t{t_stat}\t{p_val}")
-
-
-    print(len(classification_reports_emo))
-
-    #t_stat, p_val = stats.ttest_rel(f1_scores_emo, f1_scores_noemo)
-    #todo
-    #try other countvectorizers
-    #look at other papers that use xed
-   
+    print(f"AUC\t{t_stat}\t{p_val}")   
 
 if __name__ == "__main__":
     main()

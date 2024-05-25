@@ -1,3 +1,5 @@
+# standard implementation of linearsvc model with n-grams and emotion features, used for basic data visualization and feature importance
+
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.multiclass import OneVsRestClassifier
@@ -15,6 +17,7 @@ import matplotlib.pyplot as plt
 import tokenizer
 import emotions
 
+#provides an overview of the dataset (shown in table 3)
 def get_dataset_stats(data):
     sentcnt = 0
     labelcnt = 0
@@ -77,7 +80,7 @@ def get_dataset_stats(data):
     print(f'\tsurprise: {surprisecnt/labelcnt*100}%')
     print(f'\ttrust: {trustcnt/labelcnt*100}%')     
 
-
+#figure 1
 def get_emocnt_pct(data):
     lex = emotions.build_lexicon()
     emotions.show_lexicon_stats(lex)
@@ -121,6 +124,7 @@ def get_emocnt_pct(data):
         ax.legend()
         plt.show()
 
+#figure 3
 def get_intensity_per_emo(data):
     lex = emotions.build_lexicon()
     emoval = pd.DataFrame.from_dict(emotions.get_emotion_features(data['text'].apply(lambda x: tokenizer.tokenize_nostem(x)), lex))
@@ -186,6 +190,7 @@ def train_model(train_X, train_y, test_X, test_y, use_intensity):
     yy = mlb.transform(test_y.str.replace(' ', '').str.split(','))
     features = vec.get_feature_names_out()
 
+    #get emotion intensity values and append to matrix of token counts
     if use_intensity:
         tok_Xtrain = train_X.apply(lambda x: tokenizer.tokenize_nostem_lem(x))
         tok_Xtest = test_X.apply(lambda x: tokenizer.tokenize_nostem_lem(x))
@@ -215,15 +220,12 @@ def get_clf_metrics(clf, y_true, y_pred, features):
         #remove last 8 features which are emotion intensity values
         imp = imp[:-8]
         feat_noemo = features[:-8]
-        #get absolute value of importance
         feature_importance = dict(zip(feat_noemo, imp))
         sorted_feature_importance[i] = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
-        #get top 10 and bottom 10 features
+        #get top 10 positive features
+        #table 7 and 8
         print(f"\nTop features for label {target_names[i]}:")
         for feature, importance in sorted_feature_importance[i][:5]:
-            print(f'\tFeature: {feature}, Importance: {importance}')
-        print(f"\nBottom features for label {target_names[i]}:")
-        for feature, importance in sorted_feature_importance[i][-5:]:
             print(f'\tFeature: {feature}, Importance: {importance}')
     for i in range(0, len(clf.estimators_)):
         imp = clf.estimators_[i].coef_[0]
@@ -268,11 +270,6 @@ def get_clf_metrics(clf, y_true, y_pred, features):
                         emoint_dict['trust'][feature] = importance
             if(len(ngram)<10 and feature not in emo):
                 ngram.append(f'\tFeature: {feature}, Importance: {importance}')
-        # for n in ngram:
-        #     print(n)
-        # for e in emo_int:
-        #     print(e)
-    #if emoint_dict is filled, call visualize_importance(emoint_dict)
     if emoint_dict['anger']:
         visualize_importance(emoint_dict)
 
@@ -283,6 +280,7 @@ def get_clf_metrics(clf, y_true, y_pred, features):
 
     return(classification_report(y_true, y_pred, target_names=target_names, output_dict=True, zero_division=0.0))
 
+#figure 4
 def visualize_importance(emos):
     #create heatmap
     fig, ax = plt.subplots()
@@ -330,7 +328,7 @@ def visualize_importance(emos):
     plt.show()
 
 def main():
-    data = pd.read_csv('en-annotated.tsv', sep='\t', names=['text', 'label'])
+    data = pd.read_csv('data/en-annotated.tsv', sep='\t', names=['text', 'label'])
     data.head()
 
     # Check if there are any missing values.
@@ -341,37 +339,20 @@ def main():
     dd = pd.DataFrame.from_dict(after_tokenize)
     dd.to_csv ('help.tsv', sep='\t', index=False)
 
-    # emowdcnt = emotions.get_emoword_cnt(data['text'].apply(lambda x: tokenizer.tokenize_nostem(x)), emotions.build_lexicon())
+    labeldf = data['label']
 
-    # #drop rows with no emotion words
-    # data = data[emowdcnt > 0].reset_index(drop=True)
-
-    df = data['label']
-
-    xd = data['text']
+    textdf = data['text']
     
     print(get_emocnt_pct(data))
     get_intensity_per_emo(data)
-    get_dataset_stats(df)
+    get_dataset_stats(labeldf)
 
-    train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df, test_size=0.1, stratify=df.str.replace(' ', '').str.split(',').apply(lambda x: x[0]), random_state=42)
-    train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y.str.split(',').apply(lambda x: x[0]), random_state=42)
+    train_X, test_X, train_y, test_y = train_test_split(textdf, labeldf, test_size=0.1, stratify=labeldf.str.replace(' ', '').str.split(',').apply(lambda x: x[0]), random_state=42)
 
-    # train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, df[0], test_size=0.1, random_state=42)
-    # train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, random_state=42)
-    # ddf = pd.DataFrame(df[0].str.split(',').apply(lambda x: x[0]))
-    
-    # train_dev_X, test_X, train_dev_y, test_y = train_test_split(xd, ddf[0], test_size=0.1, stratify=ddf[0], random_state=42)
-    # train_X, dev_X, train_y, dev_y = train_test_split(train_dev_X, train_dev_y, test_size=0.222, stratify=train_dev_y, random_state=42)
-
-    #clf = LinearSVC(class_weight='balanced', C=0.05, random_state=42)
-    # test_X = xd
-    # test_y = df
-
-    train_X = train_dev_X.reset_index(drop=True)
+    train_X = train_X.reset_index(drop=True)
     test_X = test_X.reset_index(drop=True)
 
-    train_y = train_dev_y.reset_index(drop=True)
+    train_y = train_y.reset_index(drop=True)
 
     cr_int = train_model(train_X, train_y, test_X, test_y, True)
     cr_noint = train_model(train_X, train_y, test_X, test_y, False)
