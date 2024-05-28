@@ -1,0 +1,6 @@
+# Using Emotion Word Intensities for Multi-label Emotion Detection of Text
+Authors: Andrei Francis U. Enrique and Maria Art Antonette D. Clariño
+
+Emotion word intensity values were derived from an emotion intensity lexicon and used along with n-grams as baseline features to create a linear support vector machine classifier using the one-vs-rest strategy for multi-labeled emotion data. The model was trained on a dataset of English subtitles and compared to a similarly configured classifier which only included baseline features. The results showed that the classifier with emotion intensity values performed significantly better than the model without these features, achieving a macro f1 score of 0.4359. Furthermore, emotion intensity values for disgust, fear, joy, and sadness showed very high feature importance for their respective emotion labels. The findings suggest that the use of emotion word intensities can help classification models in identifying the emotions expressed within bodies of text.
+
+Keywords: Sentiment Analysis, Text-based Emotion Detection, Emotion Intensity, NLP, Multi-label Classification
