@@ -336,9 +336,6 @@ def main():
     
     after_tokenize = tokenizer.tokenize_fromdf(data, True)
 
-    dd = pd.DataFrame.from_dict(after_tokenize)
-    dd.to_csv ('help.tsv', sep='\t', index=False)
-
     labeldf = data['label']
 
     textdf = data['text']
