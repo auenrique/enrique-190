@@ -16,5 +16,5 @@
 1. Install the required packages
 2. Run 'ngrams_svc1.py' or 'ngrams_svc_kfold.py' using the following command:
 ```
-py file1
+py file_of_choice
 ```
