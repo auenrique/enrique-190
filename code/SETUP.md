@@ -2,11 +2,11 @@
 ## Prerequisites
 * Python (tested on version 3.11.3)
 * Packages
-** numpy
-** pandas
-** sklearn
-** nltk
-** matplotlib
+  * numpy
+  * pandas
+  * sklearn
+  * nltk
+  * matplotlib
 ## File Overview
 * emotions.py - contains functions for emotion feature extraction using the NRC Emotion Intensity Lexicon
 * tokenizer.py - contains generic preprocessing functions
